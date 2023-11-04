@@ -16,7 +16,7 @@ const LeftSidebar = () => {
   const { user } = useUserContext();
 
   useEffect(() => {
-    if (isSuccess) navigate("/");
+    if (isSuccess) navigate("/sign-in");
   }, [isSuccess]);
   return (
     <nav className="leftsidebar">
