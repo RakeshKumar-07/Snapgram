@@ -1,38 +1,55 @@
-import GridPostList from "@/components/shared/GridPostList";
-import Loader from "@/components/shared/Loader";
-import SearchResults from "@/components/shared/SearchResults";
-import { Input } from "@/components/ui/input";
+import { useEffect, useState } from "react";
+import { useInView } from "react-intersection-observer";
+
+import { Input } from "@/components/ui";
 import useDebounce from "@/hooks/useDebounce";
+import { GridPostList, Loader } from "@/components/shared";
 import {
   useGetPosts,
   useSearchPosts,
 } from "@/lib/react-query/queriesAndMutations";
-import { useEffect, useState } from "react";
-import { useInView } from "react-intersection-observer";
+
+export type SearchResultProps = {
+  isSearchFetching: boolean;
+  searchedPosts: any;
+};
+
+const SearchResults = ({
+  isSearchFetching,
+  searchedPosts,
+}: SearchResultProps) => {
+  if (isSearchFetching) {
+    return <Loader />;
+  } else if (searchedPosts && searchedPosts.documents.length > 0) {
+    return <GridPostList posts={searchedPosts.documents} />;
+  } else {
+    return (
+      <p className="text-light-4 mt-10 text-center w-full">No results found</p>
+    );
+  }
+};
 
 const Explore = () => {
   const { ref, inView } = useInView();
-
   const { data: posts, fetchNextPage, hasNextPage } = useGetPosts();
 
   const [searchValue, setSearchValue] = useState("");
-
-  const deBouncedValue = useDebounce(searchValue, 500);
-
+  const debouncedSearch = useDebounce(searchValue, 500);
   const { data: searchedPosts, isFetching: isSearchFetching } =
-    useSearchPosts(deBouncedValue);
+    useSearchPosts(debouncedSearch);
 
   useEffect(() => {
-    if (inView && !searchValue) fetchNextPage();
+    if (inView && !searchValue) {
+      fetchNextPage();
+    }
   }, [inView, searchValue]);
 
-  if (!posts) {
+  if (!posts)
     return (
       <div className="flex-center w-full h-full">
         <Loader />
       </div>
     );
-  }
 
   const shouldShowSearchResults = searchValue !== "";
   const shouldShowPosts =
@@ -42,7 +59,7 @@ const Explore = () => {
   return (
     <div className="explore-container">
       <div className="explore-inner_container">
-        <h2 className="h3-bold md:h2-bold w-full">Search Post</h2>
+        <h2 className="h3-bold md:h2-bold w-full">Search Posts</h2>
         <div className="flex gap-1 px-4 w-full rounded-lg bg-dark-4">
           <img
             src="/assets/icons/search.svg"
@@ -55,12 +72,17 @@ const Explore = () => {
             placeholder="Search"
             className="explore-search"
             value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
+            onChange={(e) => {
+              const { value } = e.target;
+              setSearchValue(value);
+            }}
           />
         </div>
       </div>
+
       <div className="flex-between w-full max-w-5xl mt-16 mb-7">
         <h3 className="body-bold md:h3-bold">Popular Today</h3>
+
         <div className="flex-center gap-3 bg-dark-3 rounded-xl px-4 py-2 cursor-pointer">
           <p className="small-medium md:base-medium text-light-2">All</p>
           <img
@@ -71,6 +93,7 @@ const Explore = () => {
           />
         </div>
       </div>
+
       <div className="flex flex-wrap gap-9 w-full max-w-5xl">
         {shouldShowSearchResults ? (
           <SearchResults

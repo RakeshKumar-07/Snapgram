@@ -21,7 +21,6 @@ import { toast } from "../ui/use-toast";
 import { useNavigate } from "react-router-dom";
 import {
   useCreatePost,
-  useDeletePost,
   useUpdatePost,
 } from "@/lib/react-query/queriesAndMutations";
 
