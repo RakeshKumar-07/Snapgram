@@ -342,7 +342,9 @@ export async function deletePost(postId?: string, imageId?: string) {
 
     if (!statusCode) throw Error;
 
-    await deleteFile(imageId);
+    const isDeleted = await deleteFile(imageId);
+
+    if (!isDeleted) throw Error;
 
     return { status: "Ok" };
   } catch (error) {
